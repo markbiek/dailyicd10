@@ -32,7 +32,7 @@ if __name__ == "__main__":
                         access_token_key=tokens['key'],
                         access_token_secret=tokens['secret'])
 
-    line = random.choice(open('icd10.txt').readlines())
+    line = random.choice(open('/home/mark/dev/icd-10/icd10.txt').readlines())
 
     ret = api.PostUpdate(line)
     if ret is None:

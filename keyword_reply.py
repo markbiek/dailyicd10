@@ -3,8 +3,10 @@
 import sys
 import random
 import re
+import pickle
 import twitter
 
+_SETTINGS = 'icd10.pickle'
 _USERNAME = u'@DailyICD10'
 _LINES = []
 
@@ -32,8 +34,7 @@ def isDirectMention(status):
 
     return status.text[0:len(_USERNAME)] == _USERNAME
 
-def getMentions():
-    since_id = getLastMentionId()
+def getMentions(since_id):
     all_mentions = api.GetMentions(since_id=since_id)
     mentions = []
 
@@ -56,16 +57,21 @@ def getDescriptionFromKeyword(keyword):
     results = [desc for desc in _LINES if keyword in desc]
 
     if len(results) <= 0:
-        return ""
+        desc = "" 
     else:
-        return random.choice(results)
+        desc = random.choice(results)
 
-def getLastMentionId():
-    #TODO
-    return None
+    if len(desc) > 140:
+        desc = desc[:140]
+
+    return desc
 
 if __name__ == "__main__":
     _LINES = open('/home/mark/dev/icd-10/icd10.txt').readlines()
+
+    fsettings = open(_SETTINGS, 'rb')
+    since_id = pickle.load(fsettings)
+    fsettings.close()
 
     tokens = loadAccessToken()
     if ("key" not in tokens.keys() or 
@@ -80,9 +86,10 @@ if __name__ == "__main__":
                         access_token_key=tokens['key'],
                         access_token_secret=tokens['secret'])
 
-    mentions = getMentions()
+    mentions = getMentions(since_id=since_id)
 
     for status in mentions:
+        since_id = status.id
         keywords = getStatusKeywords(status)
 
         for keyword in keywords:
@@ -101,4 +108,7 @@ if __name__ == "__main__":
                 #TODO
                 pass
 
+    fsettings = open(_SETTINGS, 'wb')
+    pickle.dump(since_id, fsettings)
+    fsettings.close()
     sys.exit(0)

@@ -45,9 +45,8 @@ def getMentions():
     return mentions
 
 def getStatusKeywords(status):
-    keywords = []
-    text = status.text.replace(_USERNAME, "")
-    print(text)
+    keywords = status.text.replace(_USERNAME, "").split(',')
+    print(keywords)
 
 def getLastMentionId():
     #TODO

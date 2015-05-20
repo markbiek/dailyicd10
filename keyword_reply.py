@@ -6,9 +6,13 @@ import re
 import pickle
 import twitter
 
-_SETTINGS = 'icd10.pickle'
+_SETTINGS = '/home/mark/dev/icd-10/icd10.pickle'
 _USERNAME = u'@DailyICD10'
 _LINES = []
+
+def dbg(msg):
+    pass
+    #print(msg)
 
 def loadAccessToken():
     vals = {}
@@ -86,13 +90,16 @@ if __name__ == "__main__":
                         access_token_key=tokens['key'],
                         access_token_secret=tokens['secret'])
 
+    dbg("Getting mentions since " + str(since_id))
     mentions = getMentions(since_id=since_id)
 
     for status in mentions:
+        dbg("Processing mention " + str(status.id))
         since_id = status.id
         keywords = getStatusKeywords(status)
 
         for keyword in keywords:
+            dbg("Processing keyword " + keyword)
             desc = getDescriptionFromKeyword(keyword)
 
             if desc == "":
@@ -102,11 +109,13 @@ if __name__ == "__main__":
 
             try:
                 ret = api.PostUpdate(reply)
+                dbg(reply)
                 if ret is None:
                     print "WARNING: PostUpdate returned None. Your post may have failed."
             except:
-                #TODO
-                pass
+                e = sys.exc_info()[0]
+                dbg("Error: %s" % e)
+                print("Error: %s" % e)
 
     fsettings = open(_SETTINGS, 'wb')
     pickle.dump(since_id, fsettings)

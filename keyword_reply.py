@@ -6,6 +6,7 @@ import re
 import twitter
 
 _USERNAME = u'@DailyICD10'
+_LINES = []
 
 def loadAccessToken():
     vals = {}
@@ -46,13 +47,26 @@ def getMentions():
 
 def getStatusKeywords(status):
     keywords = status.text.replace(_USERNAME, "").split(',')
-    print(keywords)
+
+    return keywords
+
+def getDescriptionFromKeyword(keyword):
+    global _LINES
+
+    results = [desc for desc in _LINES if keyword in desc]
+
+    if len(results) <= 0:
+        return ""
+    else:
+        return random.choice(results)
 
 def getLastMentionId():
     #TODO
     return None
 
 if __name__ == "__main__":
+    _LINES = open('/home/mark/dev/icd-10/icd10.txt').readlines()
+
     tokens = loadAccessToken()
     if ("key" not in tokens.keys() or 
             "secret" not in tokens.keys() or 
@@ -70,5 +84,21 @@ if __name__ == "__main__":
 
     for status in mentions:
         keywords = getStatusKeywords(status)
+
+        for keyword in keywords:
+            desc = getDescriptionFromKeyword(keyword)
+
+            if desc == "":
+                desc = "Sorry, couldn't find anything for " + keyword
+
+            reply = "@" + status.user.screen_name + " " + desc
+
+            try:
+                ret = api.PostUpdate(reply)
+                if ret is None:
+                    print "WARNING: PostUpdate returned None. Your post may have failed."
+            except:
+                #TODO
+                pass
 
     sys.exit(0)

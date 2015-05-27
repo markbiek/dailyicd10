@@ -103,7 +103,7 @@ if __name__ == "__main__":
             desc = getDescriptionFromKeyword(keyword)
 
             if desc == "":
-                desc = "Sorry, couldn't find anything for " + keyword
+                desc = "Sorry, couldn't find anything for" + keyword
 
             reply = "@" + status.user.screen_name + " " + desc
 
